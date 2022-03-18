@@ -4,6 +4,7 @@ from operators.load_dimension import *
 from operators.load_fact import *
 from operators.data_quality import *
 from helpers.sql_queries import *
+from helpers.unit_test import *
 
 
 class UdacityPlugin(AirflowPlugin):
@@ -16,4 +17,5 @@ class UdacityPlugin(AirflowPlugin):
     ]
     helpers = [
         SqlQueries,
+        UnitTest,
     ]

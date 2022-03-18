@@ -30,8 +30,11 @@ class StageToRedshiftOperator(BaseOperator):
             resource_type='s3',
             region_name='us-west-2',
         )
+        logging.info("Getting AWS credentials")
         credentials = aws_hook.get_credentials()
         logging.info(f"Credentials: {credentials}")
+
+        logging.info("Connecting to Redshift")
         redshift = PostgresHook(postgres_conn_id=self.redshift_conn_id)
 
         logging.info("Clearing data from destination Redshift table")

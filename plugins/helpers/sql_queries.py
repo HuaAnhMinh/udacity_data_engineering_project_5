@@ -146,3 +146,20 @@ class SqlQueries:
                extract(month from start_time), extract(year from start_time), extract(dayofweek from start_time)
         FROM songplays
     """)
+
+    check_duplicate_rows = ("""
+        SELECT
+            (SELECT COUNT(*) FROM {})
+            -
+            (SELECT COUNT(DISTINCT {}.*) FROM {})
+    """)
+
+    check_null_column = ("""
+        SELECT COUNT(*) FROM {} WHERE {} IS NULL
+    """)
+
+    check_existed_foreign_key = ("""
+        SELECT COUNT(*) FROM {} a
+        RIGHT JOIN {} b ON a.{} = b.{}
+        WHERE a.{} IS NULL AND b.{} IS NOT NULL
+    """)
