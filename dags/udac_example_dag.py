@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.dummy_operator import DummyOperator
-from airflow.operators.postgres_operator import PostgresOperator
 from operators.stage_redshift import StageToRedshiftOperator
 from operators.load_dimension import LoadDimensionOperator
 from operators.load_fact import LoadFactOperator
@@ -30,20 +29,6 @@ dag = DAG(
 
 start_operator = DummyOperator(task_id='Begin_execution', dag=dag)
 
-create_staging_events_table = PostgresOperator(
-    task_id='create_staging_events_table',
-    dag=dag,
-    postgres_conn_id=REDSHIFT_CONN_ID,
-    sql=SqlQueries.create_staging_events_table,
-)
-
-create_staging_songs_table = PostgresOperator(
-    task_id='create_staging_songs_table',
-    dag=dag,
-    postgres_conn_id=REDSHIFT_CONN_ID,
-    sql=SqlQueries.create_staging_songs_table,
-)
-
 stage_events_to_redshift = StageToRedshiftOperator(
     task_id='stage_events_to_redshift',
     dag=dag,
@@ -62,43 +47,6 @@ stage_songs_to_redshift = StageToRedshiftOperator(
     aws_credentials_id=AWS_CONN_ID,
     s3_bucket='udacity-dend',
     s3_key='song_data',
-)
-
-create_fact_dim_tables_task = DummyOperator(task_id='create_fact_dim_tables', dag=dag)
-
-create_songs_table_task = PostgresOperator(
-    task_id="create_songs_table",
-    dag=dag,
-    postgres_conn_id=REDSHIFT_CONN_ID,
-    sql=SqlQueries.create_songs_table,
-)
-
-create_artists_table_task = PostgresOperator(
-    task_id="create_artists_table",
-    dag=dag,
-    postgres_conn_id=REDSHIFT_CONN_ID,
-    sql=SqlQueries.create_artists_table,
-)
-
-create_users_table_task = PostgresOperator(
-    task_id="create_users_table",
-    dag=dag,
-    postgres_conn_id=REDSHIFT_CONN_ID,
-    sql=SqlQueries.create_users_table,
-)
-
-create_time_table_task = PostgresOperator(
-    task_id="create_time_table",
-    dag=dag,
-    postgres_conn_id=REDSHIFT_CONN_ID,
-    sql=SqlQueries.create_time_table,
-)
-
-create_songplays_table_task = PostgresOperator(
-    task_id="create_songplays_table",
-    dag=dag,
-    postgres_conn_id=REDSHIFT_CONN_ID,
-    sql=SqlQueries.create_songplays_table,
 )
 
 load_songplays_table_task = LoadFactOperator(
@@ -154,22 +102,10 @@ data_quality_task = DataQualityOperator(
 
 end_operator = DummyOperator(task_id='Stop_execution', dag=dag)
 
-start_operator >> create_staging_events_table
-start_operator >> create_staging_songs_table
-create_staging_events_table >> stage_events_to_redshift
-create_staging_songs_table >> stage_songs_to_redshift
-stage_events_to_redshift >> create_fact_dim_tables_task
-stage_songs_to_redshift >> create_fact_dim_tables_task
-create_fact_dim_tables_task >> create_songs_table_task
-create_fact_dim_tables_task >> create_artists_table_task
-create_fact_dim_tables_task >> create_users_table_task
-create_fact_dim_tables_task >> create_time_table_task
-create_fact_dim_tables_task >> create_songplays_table_task
-create_songs_table_task >> load_songplays_table_task
-create_artists_table_task >> load_songplays_table_task
-create_users_table_task >> load_songplays_table_task
-create_time_table_task >> load_songplays_table_task
-create_songplays_table_task >> load_songplays_table_task
+start_operator >> stage_events_to_redshift
+start_operator >> stage_songs_to_redshift
+stage_events_to_redshift >> load_songplays_table_task
+stage_songs_to_redshift >> load_songplays_table_task
 load_songplays_table_task >> load_songs_table_task
 load_songplays_table_task >> load_artists_table_task
 load_songplays_table_task >> load_users_table_task
