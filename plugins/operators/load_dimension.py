@@ -1,3 +1,4 @@
+import logging
 from airflow.hooks.postgres_hook import PostgresHook
 from airflow.models import BaseOperator
 from airflow.utils.decorators import apply_defaults
@@ -12,7 +13,7 @@ class LoadDimensionOperator(BaseOperator):
                  redshift_conn_id="",
                  table="",
                  sql_query="",
-                 mode="",
+                 mode="delete-load",
                  *args, **kwargs):
 
         super(LoadDimensionOperator, self).__init__(*args, **kwargs)
@@ -22,6 +23,7 @@ class LoadDimensionOperator(BaseOperator):
         self.mode = mode
 
     def execute(self, context):
+        logging.info(f"Load dimension mode: {self.mode})
         redshift = PostgresHook(postgres_conn_id=self.redshift_conn_id)
         if self.mode == 'delete-load':
             redshift.run("TRUNCATE TABLE {}".format(self.table))
