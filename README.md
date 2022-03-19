@@ -20,4 +20,5 @@
 9. You can type in these modes to run:
    1. `{ "mode": "delete-load" }`: Delete data from dimension tables and load all.
    2. `{ "mode": "append-only" }`: Append data to dimension tables.
-10. Wait for DAG to finish.
+10. Wait for DAG to finish. 
+11. **Note: when loading data from staging_songs, due to the s3://udacity-dend/song_data is too large so PostgresHook might have error if it is reading too long. You can resize it by using prefix to load a subset: song_data/A/A.**
